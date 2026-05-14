@@ -69,7 +69,7 @@ class PollCard extends HTMLElement {
                 }
                 button {
                     background-color: var(--primary-color);
-                    color: var(--text-color);
+                    color: gold;
                     border: none;
                     padding: 0.75rem 1rem;
                     border-radius: 5px;
@@ -80,9 +80,6 @@ class PollCard extends HTMLElement {
                 button:hover {
                     background-color: var(--secondary-color);
                     box-shadow: 0 0 15px var(--glow-color);
-                }
-                .friend {
-                    background-color: var(--secondary-color);
                 }
             </style>
             <div class="card">
@@ -121,25 +118,48 @@ class PollCard extends HTMLElement {
 }
 customElements.define('poll-card', PollCard);
 
-function getWeek() {
-    const today = new Date();
-    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-    const week = [];
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(startOfWeek);
-        date.setDate(startOfWeek.getDate() + i);
-        week.push(date);
-    }
-    return week;
-}
-
 const pollContainer = document.getElementById('poll-container');
-const week = getWeek();
+const startDateInput = document.getElementById('start-date');
+const endDateInput = document.getElementById('end-date');
 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-week.forEach((date, index) => {
-    const pollCard = document.createElement('poll-card');
-    pollCard.setAttribute('day', days[index]);
-    pollCard.setAttribute('date', date.toLocaleDateString());
-    pollContainer.appendChild(pollCard);
+function generatePolls(startDate, endDate) {
+    pollContainer.innerHTML = '';
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    let currentDate = start;
+    while (currentDate <= end) {
+        const pollCard = document.createElement('poll-card');
+        pollCard.setAttribute('day', days[currentDate.getDay()]);
+        pollCard.setAttribute('date', currentDate.toLocaleDateString());
+        pollContainer.appendChild(pollCard);
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+}
+
+function setDefaultDates() {
+    const today = new Date();
+    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    startDateInput.valueAsDate = startOfWeek;
+    endDateInput.valueAsDate = endOfWeek;
+
+    generatePolls(startOfWeek, endOfWeek);
+}
+
+startDateInput.addEventListener('change', () => {
+    if (startDateInput.value && endDateInput.value) {
+        generatePolls(startDateInput.value, endDateInput.value);
+    }
 });
+
+endDateInput.addEventListener('change', () => {
+    if (startDateInput.value && endDateInput.value) {
+        generatePolls(startDateInput.value, endDateInput.value);
+    }
+});
+
+setDefaultDates();
