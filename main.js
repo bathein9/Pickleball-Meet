@@ -149,7 +149,6 @@ function getCurrentLocationId() {
 
 function updateUIAccess() {
     const isAdmin = user && user.isAdmin;
-    const isLoggedIn = user !== null;
 
     locationInput.disabled = !isAdmin;
     startDateInput.disabled = !isAdmin;
@@ -160,8 +159,6 @@ function updateUIAccess() {
         shadowRoot.querySelector('.location').disabled = !isAdmin;
         shadowRoot.querySelector('.start-time').disabled = !isAdmin;
         shadowRoot.querySelector('.end-time').disabled = !isAdmin;
-        shadowRoot.querySelector('.coming').disabled = !isLoggedIn;
-        shadowRoot.querySelector('.friend').disabled = !isLoggedIn;
     });
 }
 
@@ -238,10 +235,6 @@ pollContainer.addEventListener('data-change', (e) => {
 });
 
 pollContainer.addEventListener('add-attendee', (e) => {
-    if (!user) {
-        alert('Please login to join.');
-        return;
-    }
     currentCard = e.target;
     isFriend = e.detail.isFriend;
     attendeeModalTitle.textContent = isFriend ? 'Add Friend' : 'Add Yourself';
@@ -286,21 +279,14 @@ loginSubmit.addEventListener('click', () => {
 
     if (username === 'Admin' && password === 'Admin123') {
         user = { name: 'Admin', isAdmin: true };
+        loginBtn.textContent = 'Logout';
+        loginModal.style.display = 'none';
+        usernameInput.value = '';
+        passwordInput.value = '';
+        updateUIAccess();
     } else {
-        const userNum = parseInt(username, 10);
-        if (!isNaN(userNum) && userNum >= 1 && userNum <= 9 && password === '') {
-            user = { name: username, isAdmin: false };
-        } else {
-            alert('Invalid login credentials.');
-            return;
-        }
+        alert('Invalid admin credentials.');
     }
-
-    loginBtn.textContent = 'Logout';
-    loginModal.style.display = 'none';
-    usernameInput.value = '';
-    passwordInput.value = '';
-    updateUIAccess();
 });
 
 // Attendee Modal Logic
